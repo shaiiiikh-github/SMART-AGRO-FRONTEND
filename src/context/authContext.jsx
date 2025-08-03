@@ -1,6 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext();
 
@@ -8,9 +7,8 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
-  // Add this function to check auth status
+  // ✅ Check if already logged in
   const checkAuth = async () => {
     try {
       const res = await axios.get('http://localhost:5000/api/auth/check', {
@@ -31,6 +29,7 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
+  // ✅ Login logic
   const login = async (credentials) => {
     try {
       const res = await axios.post(
@@ -58,20 +57,21 @@ export const AuthProvider = ({ children }) => {
       );
       setUser(null);
       setIsAuthenticated(false);
-      navigate('/login');
     } catch (err) {
       console.error('Logout failed:', err);
     }
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      isAuthenticated, 
-      loading, 
-      login, 
+    <AuthContext.Provider value={{
+      user,
+      isAuthenticated,
+      loading,
+      login,
       logout,
-      checkAuth 
+      checkAuth,
+      setUser,
+      setIsAuthenticated
     }}>
       {children}
     </AuthContext.Provider>

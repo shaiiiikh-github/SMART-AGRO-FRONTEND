@@ -14,7 +14,7 @@ import CropInsights from './pages/insights/CropInsights';
 import SystemInsights from './pages/insights/SystemInsights';
 import AOS from 'aos'; // Add this import
 import 'aos/dist/aos.css'; // Add this import
-import GitHubCallback from './pages/auth/GitHubCallBack';
+import GitHubCallBack from './pages/auth/GitHubCallBack';
 import Footer from './components/footer';
 import { useEffect } from 'react';
 
@@ -37,7 +37,7 @@ function App() {
         <Route path="/about" element={<AboutUs />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/github/callback" element={<GitHubCallback />} />
+        <Route path="/github/callback" element={<GitHubCallBack />} />
         <Route path="/insights/soil" element={<SoilInsights />} />
         <Route path="/insights/solar" element={<SolarInsights />} />
         <Route path="/insights/crop" element={<CropInsights />} />

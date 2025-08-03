@@ -4,6 +4,10 @@ import { GoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from "jwt-decode";
 import { useAuth } from "../../context/authContext";
 import axios from 'axios';
+import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
+const GITHUB_CLIENT_ID = import.meta.env.VITE_GITHUB_CLIENT_ID;
+
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -20,7 +24,7 @@ const Login = () => {
     if (result.success) {
       navigate("/dashboard");
     } else {
-      setError(result.error || "Invalid login credentials");
+      alert(result.error || "Invalid login credentials");
     }
   };
 
@@ -57,7 +61,7 @@ const Login = () => {
           <button
             className="flex items-center justify-center gap-3 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition text-gray-700"
             onClick={() => {
-              window.location.href = `https://github.com/login/oauth/authorize?client_id=${import.meta.env.VITE_GITHUB_CLIENT_ID}&redirect_uri=http://localhost:5173/github/callback`;
+             window.location.href = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&redirect_uri=http://localhost:5173/github/callback`;
             }}
           >
             <img src="https://www.svgrepo.com/show/452091/github.svg" alt="GitHub" className="w-5 h-5" />

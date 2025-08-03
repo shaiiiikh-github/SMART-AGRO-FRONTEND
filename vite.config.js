@@ -10,4 +10,7 @@ export default defineConfig({
       '@components': path.resolve(__dirname, 'src/components'),
     },
   },
+  server: {
+    historyApiFallback: true // ✅ THIS LINE fixes the issue
+  }
 })
