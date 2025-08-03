@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  FiSun, FiDroplet, FiThermometer, 
+import {
+  FiSun, FiDroplet, FiThermometer,
   FiAlertCircle, FiImage, FiBarChart2,
   FiSettings, FiCalendar, FiLoader,
   FiUpload, FiCamera
@@ -14,15 +14,14 @@ const Dashboard = () => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState(null);
 
   useEffect(() => {
-    // Initialize animation library
     AOS.init({
       duration: 800,
       once: true
     });
 
-    // Simulate data loading
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 1500);
@@ -30,26 +29,26 @@ const Dashboard = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Sample data
+  // Sample data (unchanged)
   const soilData = {
     moisture: 65,
     temperature: 28,
     humidity: 72,
     pH: 6.8
   };
-  
+
   const solarData = {
     currentOutput: 450,
     dailyProduction: 3.2,
     efficiency: 82,
     batteryLevel: 75
   };
-  
+
   const alerts = [
     { id: 1, type: 'irrigation', message: 'Low soil moisture detected in field A', time: '2 hours ago', critical: true },
     { id: 2, type: 'weather', message: 'Rain expected in 6 hours', time: '4 hours ago', critical: false }
   ];
-  
+
   const cropHealth = {
     diseaseRisk: 35,
     growthStage: 'Vegetative',
@@ -62,6 +61,7 @@ const Dashboard = () => {
     if (file) {
       setSelectedImage(file);
       setPreviewImage(URL.createObjectURL(file));
+      setAnalysisResult(null); // Clear previous results when new image is selected
     }
   };
 
@@ -72,6 +72,7 @@ const Dashboard = () => {
         const blob = items[i].getAsFile();
         setSelectedImage(blob);
         setPreviewImage(URL.createObjectURL(blob));
+        setAnalysisResult(null); // Clear previous results when new image is pasted
         break;
       }
     }
@@ -79,32 +80,39 @@ const Dashboard = () => {
 
   const uploadImage = async () => {
     if (!selectedImage) return;
-    
+
     setIsUploading(true);
     try {
       const formData = new FormData();
-      formData.append('image', selectedImage);
-      
-      // Replace with your actual backend endpoint
-      const response = await fetch('http://your-python-backend/api/analyze', {
+      formData.append('image', selectedImage);  // Key must match Flask's expectation
+
+      const response = await fetch('http://localhost:5000/api/analyze', {
         method: 'POST',
-        body: formData
+        body: formData,
+        // Don't set Content-Type header - let browser set it automatically
+        // with the correct boundary for FormData
       });
-      
-      if (response.ok) {
-        const result = await response.json();
-        alert('Image analysis complete!');
-        // You can update the crop health data with the response
-        console.log('Analysis result:', result);
-      } else {
-        throw new Error('Upload failed');
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Server responded with status ${response.status}`);
       }
+
+      const result = await response.json();
+      setAnalysisResult(result);
+
     } catch (error) {
-      console.error('Error uploading image:', error);
-      alert('Failed to upload image');
+      console.error('Upload error:', error);
+      alert(`Failed to analyze image: ${error.message}`);
     } finally {
       setIsUploading(false);
     }
+  };
+
+  const resetImage = () => {
+    setSelectedImage(null);
+    setPreviewImage(null);
+    setAnalysisResult(null);
   };
 
   if (isLoading) {
@@ -128,11 +136,11 @@ const Dashboard = () => {
           <p className="text-green-600">Monitoring 3.4M data points for recyclable energy optimization</p>
         </div>
 
-        {/* Quick Stats */}
+        {/* Quick Stats (unchanged) */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {/* Soil Moisture Card */}
-          <Link 
-            to="/insights/soil" 
+          <Link
+            to="/insights/soil"
             className="bg-white p-6 rounded-xl shadow-sm border border-green-100 hover:shadow-md transition-all hover:border-green-300"
             data-aos="fade-up"
             data-aos-delay="100"
@@ -149,8 +157,8 @@ const Dashboard = () => {
           </Link>
 
           {/* Solar Output Card */}
-          <Link 
-            to="/insights/solar" 
+          <Link
+            to="/insights/solar"
             className="bg-white p-6 rounded-xl shadow-sm border border-green-100 hover:shadow-md transition-all hover:border-green-300"
             data-aos="fade-up"
             data-aos-delay="200"
@@ -167,8 +175,8 @@ const Dashboard = () => {
           </Link>
 
           {/* Crop Health Card */}
-          <Link 
-            to="/insights/crop" 
+          <Link
+            to="/insights/crop"
             className="bg-white p-6 rounded-xl shadow-sm border border-green-100 hover:shadow-md transition-all hover:border-green-300"
             data-aos="fade-up"
             data-aos-delay="300"
@@ -185,8 +193,8 @@ const Dashboard = () => {
           </Link>
 
           {/* System Alerts Card */}
-          <Link 
-            to="/insights/system" 
+          <Link
+            to="/insights/system"
             className="bg-white p-6 rounded-xl shadow-sm border border-green-100 hover:shadow-md transition-all hover:border-green-300"
             data-aos="fade-up"
             data-aos-delay="400"
@@ -205,8 +213,8 @@ const Dashboard = () => {
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Monitoring Systems Card */}
-          <div 
+          {/* Monitoring Systems Card (unchanged) */}
+          <div
             className="bg-white rounded-xl shadow-sm border border-green-100 p-6 lg:col-span-2 hover:shadow-md transition-all"
             data-aos="fade-up"
           >
@@ -217,7 +225,7 @@ const Dashboard = () => {
               </h2>
               <Link to="/insights/soil" className="text-sm text-green-600 hover:underline">View Details</Link>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-green-50 p-4 rounded-lg border border-green-100">
                 <p className="text-green-600 mb-1">Temperature</p>
@@ -238,8 +246,8 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Alerts Card */}
-          <div 
+          {/* Alerts Card (unchanged) */}
+          <div
             className="bg-white rounded-xl shadow-sm border border-green-100 p-6 hover:shadow-md transition-all"
             data-aos="fade-up"
             data-aos-delay="100"
@@ -248,10 +256,10 @@ const Dashboard = () => {
               <FiAlertCircle className="text-red-600 mr-2" />
               System Alerts
             </h2>
-            
+
             <div className="space-y-4">
               {alerts.map(alert => (
-                <div 
+                <div
                   key={alert.id}
                   className={`p-4 rounded-lg border-l-4 ${alert.critical ? 'border-red-500 bg-red-50' : 'border-green-500 bg-green-50'}`}
                 >
@@ -265,17 +273,17 @@ const Dashboard = () => {
                 </div>
               ))}
             </div>
-            
-            <Link 
-              to="/insights/system" 
+
+            <Link
+              to="/insights/system"
               className="mt-6 w-full py-2 border border-green-200 rounded-lg text-green-600 hover:bg-green-50 transition-colors flex justify-center"
             >
               View All Alerts
             </Link>
           </div>
 
-          {/* Main Optimizers Card */}
-          <div 
+          {/* Main Optimizers Card (unchanged) */}
+          <div
             className="bg-white rounded-xl shadow-sm border border-green-100 p-6 hover:shadow-md transition-all"
             data-aos="fade-up"
             data-aos-delay="200"
@@ -287,7 +295,7 @@ const Dashboard = () => {
               </h2>
               <Link to="/insights/solar" className="text-sm text-green-600 hover:underline">View Details</Link>
             </div>
-            
+
             <div className="space-y-4">
               <div>
                 <p className="text-green-600">Daily Production</p>
@@ -300,8 +308,8 @@ const Dashboard = () => {
               <div>
                 <p className="text-green-600">Battery Level</p>
                 <div className="w-full bg-green-100 rounded-full h-2.5 mt-2">
-                  <div 
-                    className="bg-green-600 h-2.5 rounded-full" 
+                  <div
+                    className="bg-green-600 h-2.5 rounded-full"
                     style={{ width: `${solarData.batteryLevel}%` }}
                   ></div>
                 </div>
@@ -310,8 +318,8 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Smart Disclosure Card */}
-          <div 
+          {/* Smart Disclosure Card (unchanged) */}
+          <div
             className="bg-white rounded-xl shadow-sm border border-green-100 p-6 hover:shadow-md transition-all"
             data-aos="fade-up"
             data-aos-delay="300"
@@ -323,13 +331,13 @@ const Dashboard = () => {
               </h2>
               <Link to="/insights/crop" className="text-sm text-green-600 hover:underline">View Details</Link>
             </div>
-            
+
             <div className="space-y-4">
               <div>
                 <p className="text-green-600">Disease Risk</p>
                 <div className="w-full bg-green-100 rounded-full h-2.5 mt-2">
-                  <div 
-                    className="bg-red-500 h-2.5 rounded-full" 
+                  <div
+                    className="bg-red-500 h-2.5 rounded-full"
                     style={{ width: `${cropHealth.diseaseRisk}%` }}
                   ></div>
                 </div>
@@ -346,8 +354,8 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* New Image Upload Card */}
-          <div 
+          {/* Updated Image Upload Card */}
+          <div
             className="bg-white rounded-xl shadow-sm border border-green-100 p-6 hover:shadow-md transition-all"
             data-aos="fade-up"
             data-aos-delay="400"
@@ -357,25 +365,33 @@ const Dashboard = () => {
               <FiCamera className="text-blue-600 mr-2" />
               Crop Image Analysis
             </h2>
-            
+
             {previewImage ? (
               <div className="mb-4">
-                <img 
-                  src={previewImage} 
-                  alt="Preview" 
+                <img
+                  src={previewImage}
+                  alt="Preview"
                   className="w-full h-48 object-cover rounded-lg mb-2"
                 />
+                {analysisResult ? (
+                  <div className="bg-green-50 p-4 rounded-lg mb-3">
+                    <h3 className="font-semibold text-green-700 mb-1">Analysis Results</h3>
+                    <p className="text-green-600">
+                      Prediction: {JSON.stringify(analysisResult.prediction)}
+                    </p>
+                    <p className="text-sm text-green-500 mt-1">
+                      {analysisResult.message}
+                    </p>
+                  </div>
+                ) : null}
                 <div className="flex space-x-2">
-                  <button 
-                    onClick={() => {
-                      setSelectedImage(null);
-                      setPreviewImage(null);
-                    }}
+                  <button
+                    onClick={resetImage}
                     className="text-sm text-red-600 hover:underline"
                   >
                     Remove
                   </button>
-                  <button 
+                  <button
                     onClick={uploadImage}
                     disabled={isUploading}
                     className={`text-sm ${isUploading ? 'text-gray-400' : 'text-green-600 hover:underline'}`}
@@ -390,32 +406,32 @@ const Dashboard = () => {
                 <p className="text-green-600 mb-2">Upload or paste crop image</p>
                 <label className="cursor-pointer text-sm text-white bg-green-600 px-3 py-1 rounded hover:bg-green-700">
                   Browse Files
-                  <input 
-                    type="file" 
-                    accept="image/*" 
-                    className="hidden" 
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
                     onChange={handleImageChange}
                   />
                 </label>
                 <p className="text-xs text-gray-500 mt-2">Supports JPG, PNG (Max 5MB)</p>
               </div>
             )}
-            
+
             <p className="text-xs text-gray-500">
               Tip: You can also paste (Ctrl+V) an image directly
             </p>
           </div>
         </div>
 
-        {/* Call to Action */}
-        <div 
+        {/* Call to Action (unchanged) */}
+        <div
           className="mt-12 bg-green-600 rounded-xl p-8 text-center"
           data-aos="fade-up"
         >
           <h2 className="text-2xl font-bold text-white mb-4">Ready to revolutionize your farm?</h2>
           <p className="text-green-100 mb-6">Join our transformed approach with full and evergreen customers</p>
-          <Link 
-            to="/contact" 
+          <Link
+            to="/contact"
             className="inline-block bg-white text-green-600 px-6 py-2 rounded-lg font-semibold hover:bg-green-50 transition-colors"
           >
             Contact Us Today
